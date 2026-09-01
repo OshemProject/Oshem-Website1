@@ -209,7 +209,8 @@
         /* MUSIC SECTION */
         .music-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 400px));
+            justify-content: center;
             gap: var(--grid-gap);
         }
 
@@ -377,7 +378,8 @@
         /* VIDEOS */
         .videos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 600px));
+            justify-content: center;
             gap: var(--grid-gap);
         }
         .video-card {
@@ -663,10 +665,11 @@
 
         .events-list {
             align-items: center;
+            width: 100%;
         }
 
         .event-item {
-            width: 100%;
+            width: min(100%, 900px);
             text-align: center;
             grid-template-columns: 150px 1fr 150px;
         }
@@ -692,7 +695,8 @@
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .event-item { grid-template-columns: 1fr; text-align: center; }
-            .videos-grid { grid-template-columns: 1fr; }
+            .music-grid,
+            .videos-grid { grid-template-columns: minmax(0, 1fr); }
             section { padding: 4rem 1.5rem; }
 
             .audio-player {
