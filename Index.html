@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSHEM//PROJECT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --surface-color: #111111;
+            --text-color: #e0e0e0;
+            --text-muted: #666666;
+            --accent-color: #ff3300;
+            --accent-secondary: #00ff88;
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
+            --section-padding: 8rem;
+            --container-width: 1400px;
+            --grid-gap: 2rem;
+            --border-radius: 0px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --player-height: 80px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: crosshair;
+            padding-bottom: var(--player-height);
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: var(--bg-color);
+        }
+
+        /* NAVIGATION */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--bg-color), transparent);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .logo:hover {
+            color: var(--accent-color);
+            text-shadow: 0 0 20px var(--accent-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            transition: var(--transition);
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 1px;
+            background: var(--accent-color);
+            transition: var(--transition);
+        }
+        .nav-links a:hover { color: var(--text-color); }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* SECTIONS */
+        section {
+            position: relative;
+            padding: var(--section-padding) 2rem;
+            max-width: var(--container-width);
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            margin-bottom: 4rem;
+            color: var(--text-color);
+        }
+        .section-title span { color: var(--accent-color); }
+
+        /* HERO */
+        #hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20vh;
+        }
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(4rem, 15vw, 12rem);
+            font-weight: 800;
+            letter-spacing: -0.06em;
+            line-height: 0.85;
+            margin-bottom: 2rem;
+        }
+        .hero-title .glitch {
+            display: block;
+            position: relative;
+            color: var(--text-color);
+        }
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 500px;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+            cursor: pointer;
+            font-family: var(--font-body);
+        }
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: var(--accent-color);
+            transition: var(--transition);
+            z-index: -1;
+        }
+        .cta-button:hover { color: var(--bg-color); box-shadow: 0 0 30px rgba(255, 51, 0, 0.3); }
+        .cta-button:hover::before { left: 0; }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem; left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* MUSIC SECTION */
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--grid-gap);
+        }
+
+        .music-card {
+            background: var(--surface-color);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 2rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .music-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: var(--transition);
+        }
+        .music-card:hover::before { transform: scaleX(1); }
+        .music-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .music-card .track-number {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            opacity: 0.3;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+        .music-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        .music-card .artist {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+        .music-card .meta {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .card-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid var(--text-muted);
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: var(--transition);
+            background: transparent;
+            cursor: pointer;
+            font-family: var(--font-body);
+        }
+        .card-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(255, 51, 0, 0.15);
+        }
+
+        .card-btn.primary {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        .card-btn.primary:hover {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px rgba(255, 51, 0, 0.3);
+        }
+        .card-btn.primary.active {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px rgba(255, 51, 0, 0.4);
+        }
+
+        /* EVENTS */
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .event-item {
+            display: grid;
+            grid-template-columns: 150px 1fr auto;
+            gap: 2rem;
+            padding: 2rem;
+            background: var(--surface-color);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: var(--transition);
+            align-items: center;
+        }
+        .event-item:hover {
+            border-color: var(--accent-color);
+            background: rgba(255, 51, 0, 0.03);
+        }
+        .event-date {
+            font-family: var(--font-display);
+            text-align: center;
+        }
+        .event-date .day {
+            display: block;
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--accent-color);
+        }
+        .event-date .month {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+        }
+        .event-info h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .event-info .location {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .event-tag {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            transition: var(--transition);
+            text-decoration: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        .event-tag:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* VIDEOS */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: var(--grid-gap);
+        }
+        .video-card {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: var(--surface-color);
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: block;
+            text-decoration: none;
+        }
+        .video-card img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+            filter: grayscale(100%) brightness(0.6);
+        }
+        .video-card:hover img {
+            filter: grayscale(0%) brightness(0.8);
+            transform: scale(1.05);
+        }
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+        .video-play {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px; height: 70px;
+            border: 2px solid var(--text-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            transition: var(--transition);
+            pointer-events: none;
+        }
+        .video-card:hover .video-play {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: translate(-50%, -50%) scale(1.1);
+            color: var(--bg-color);
+        }
+        .video-overlay h3 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            position: relative;
+            z-index: 2;
+            color: var(--text-color);
+        }
+        .video-overlay .duration {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* AUDIO PLAYER */
+        .audio-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--player-height);
+            background: rgba(10, 10, 10, 0.70);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 51, 0, 0.25);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            gap: 2rem;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+        }
+        .audio-player.active {
+            transform: translateY(0);
+        }
+
+        .player-track-info {
+            flex: 0 0 220px;
+            overflow: hidden;
+        }
+        .player-track-title {
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-color);
+        }
+        .player-track-artist {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .player-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-btn:hover { color: var(--text-color); }
+        .player-btn.play {
+            width: 44px; height: 44px;
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            color: var(--accent-color);
+            font-size: 0.9rem;
+        }
+        .player-btn.play:hover {
+            background: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        .player-progress-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-width: 0;
+            max-width: 500px;
+        }
+        .progress-times {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-color), #ffaa44);
+            border-radius: 3px;
+            transition: width 0.1s linear;
+            position: relative;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: var(--text-color);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .progress-track:hover .progress-fill::after { opacity: 1; }
+
+        .player-volume {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 0 0 160px;
+            margin-left: auto;
+        }
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            background: var(--text-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .volume-slider::-webkit-slider-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 4rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 4rem;
+        }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .social-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            transition: var(--transition);
+        }
+        .social-links a:hover {
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(255, 51, 0, 0.3);
+        }
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .event-item { grid-template-columns: 1fr; text-align: center; }
+            .videos-grid { grid-template-columns: 1fr; }
+            section { padding: 4rem 1.5rem; }
+
+            .audio-player {
+                padding: 0 1rem;
+                gap: 1rem;
+            }
+            .player-track-info { flex: 0 0 140px; }
+            .player-volume { display: none; }
+            .player-progress-area { max-width: none; }
+        }
+
+        /* CURSOR GLOW */
+        .cursor-glow {
+            position: fixed;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            background: radial-gradient(circle, rgba(255,51,0,0.08) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+            mix-blend-mode: screen;
+        }
+    </style>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+
+    <canvas id="particle-canvas"></canvas>
+    <div class="cursor-glow" id="cursor-glow"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo">OSHEM//PROJECT</a>
+        <ul class="nav-links">
+            <li><a href="#music">Music</a></li>
+            <li><a href="#events">Events</a></li>
+            <li><a href="#videos">Videos</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section id="hero">
+        <h1 class="hero-title">
+            <span class="glitch">MUSIC &</span>
+            <span class="glitch">DIGITAL ARTS</span>
+        </h1>
+        <p class="hero-subtitle">
+            We create spaces for music, arts and subcultures
+        </p>
+        <button class="cta-button" id="scroll-btn">GO DOWN THE SPIRAL</button>
+
+    </section>
+
+    <!-- Music Section -->
+    <section id="music">
+        <h2 class="section-title">Latest <span>Releases</span></h2>
+        <div class="music-grid">
+
+            <article class="music-card" data-track="0">
+                <div class="track-number">01</div>
+                <h3>STEELWORKS</h3>
+                <div class="artist">Rich Hard Gear</div>
+                <div class="meta">Single • 2026 • Tekno</div>
+                <div class="card-actions">
+                    <button class="card-btn primary play-track">▶ Listen</button>
+                    <a href="https://oshemproject.bandcamp.com/track/steelworks" target="_blank" rel="noopener noreferrer" class="card-btn">Buy</a>
+                    <!-- ← ADD YOUR SOUNDCLOUD URL HERE -->
+                    <a href="https://soundcloud.com/oshemproject/steelworks" target="_blank" rel="noopener noreferrer" class="card-btn">SoundCloud</a>
+                </div>
+            </article>
+
+            <article class="music-card" data-track="1">
+                <div class="track-number">02</div>
+                <h3>GOLDMIND</h3>
+                <div class="artist">Le Balo'</div>
+                <div class="meta">Single • 2026 • Tekno</div>
+                <div class="card-actions">
+                    <button class="card-btn primary play-track">▶ Listen</button>
+                    <a href="https://oshemproject.bandcamp.com/track/goldmind" target="_blank" rel="noopener noreferrer" class="card-btn">Buy</a>
+                    <!-- ← ADD YOUR SOUNDCLOUD URL HERE -->
+                    <a href="https://soundcloud.com/oshemproject/goldmind" target="_blank" rel="noopener noreferrer" class="card-btn">SoundCloud</a>
+                </div>
+            </article>
+
+            <article class="music-card" data-track="2">
+                <div class="track-number">03</div>
+                <h3>Le Baron et L'Insolent Vol.1</h3>
+                <div class="artist">Le Balo' VS Rich Hard Gear</div>
+                <div class="meta">EP • 2026 • Tekno / Industrial</div>
+                <div class="card-actions">
+                    <button class="card-btn primary play-track">▶ Listen</button>
+                    <a href="https://oshemproject.bandcamp.com/album/le-baron-et-linsolent-vol-1" target="_blank" rel="noopener noreferrer" class="card-btn">Buy</a>
+                    <!-- ← ADD YOUR SOUNDCLOUD URL HERE -->
+                    <a href="https://soundcloud.com/oshemproject/sets/le-baron-et-linsolent-vol1" target="_blank" rel="noopener noreferrer" class="card-btn">SoundCloud</a>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- Events -->
+    <section id="events">
+        <h2 class="section-title">Upcoming <span>Events</span></h2>
+        <div class="events-list">
+            <article class="event-item">
+                <div class="event-date">
+                    <span class="day">21</span>
+                    <span class="month">Nov</span>
+                </div>
+                <div class="event-info">
+                    <h3>Down The Spiral Vol. 2</h3>
+                    <div class="location">Distillery N17 • London</div>
+                </div>
+                <a href="#" target="_blank" rel="noopener noreferrer" class="event-tag">Tickets</a>
+            </article>
+        </div>
+    </section>
+
+    <!-- Videos -->
+    <section id="videos">
+        <h2 class="section-title">Visual <span>Archive</span></h2>
+        <div class="videos-grid">
+            <a href="https://youtu.be/EZph1iz_JfE?si=Q4UW9Ep9xK286ZA6" target="_blank" rel="noopener noreferrer" class="video-card">
+                <img src="https://OshemProject.github.io/content/coverYTwebsite.png" alt="Video thumbnail">
+                <div class="video-play">▶</div>
+                <div class="video-overlay">
+                    <h3>BRISTOL BASS EXCHANGE // BILLO SAMA VS RICH HARD GEAR</h3>
+                    <div class="duration">Watch On Youtube</div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="social-links">
+            <a href="https://instagram.com/oshem_project" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://soundcloud.com/oshemproject" target="_blank" rel="noopener noreferrer">SoundCloud</a>
+            <a href="https://oshemproject.bandcamp.com" target="_blank" rel="noopener noreferrer">Bandcamp</a>
+            <a href="https://discord.gg/c2KJ5Sbvt" target="_blank" rel="noopener noreferrer">Discord</a>
+        </div>
+        <p>© OSHEM//PROJECT. All rights reserved. No mainstream frequencies.</p>
+    </footer>
+
+    <!-- Audio Player -->
+    <div class="audio-player" id="audio-player">
+        <div class="player-track-info">
+            <div class="player-track-title" id="player-title">Select a track</div>
+            <div class="player-track-artist" id="player-artist">—</div>
+        </div>
+
+        <div class="player-controls">
+            <button class="player-btn" id="btn-prev" title="Previous">⏮</button>
+            <button class="player-btn play" id="btn-play" title="Play/Pause">▶</button>
+            <button class="player-btn" id="btn-next" title="Next">⏭</button>
+        </div>
+
+        <div class="player-progress-area">
+            <div class="progress-times">
+                <span id="time-current">0:00</span>
+                <span id="time-total">0:00</span>
+            </div>
+            <div class="progress-track" id="progress-track">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="player-volume">
+            <span style="font-size: 0.9rem;">🔊</span>
+            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="80">
+        </div>
+
+        <audio id="audio" preload="metadata"></audio>
+    </div>
+
+    <script>
+        /* ═══════════════════════════════════════
+           PARTICLE CLOUD
+           ═══════════════════════════════════════ */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        const particles = [];
+        const PARTICLE_COUNT = 180;
+        const MOUSE_RADIUS = 150;
+        const MOUSE_FORCE = 0.8;
+        const FRICTION = 0.94;
+
+        const mouse = { x: -9999, y: -9999 };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const audioPlayerEl = document.getElementById('audio-player');
+        let isOverPlayer = false;
+        audioPlayerEl.addEventListener('mouseenter', () => isOverPlayer = true);
+        audioPlayerEl.addEventListener('mouseleave', () => isOverPlayer = false);
+
+        document.addEventListener('mousemove', (e) => {
+            if (isOverPlayer) return;
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.size = Math.random() * 2 + 0.5;
+                const warm = Math.random() > 0.7;
+                this.r = warm ? 180 + Math.random() * 75 : 100 + Math.random() * 80;
+                this.g = warm ? 40 + Math.random() * 40 : 100 + Math.random() * 80;
+                this.b = warm ? 20 + Math.random() * 30 : 100 + Math.random() * 80;
+                this.alpha = Math.random() * 0.4 + 0.15;
+            }
+
+            update() {
+                this.vx += (Math.random() - 0.5) * 0.02;
+                this.vy += (Math.random() - 0.5) * 0.02;
+
+                const dx = this.x - mouse.x;
+                const dy = this.y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < MOUSE_RADIUS) {
+                    const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS;
+                    const angle = Math.atan2(dy, dx);
+                    this.vx += Math.cos(angle) * force * MOUSE_FORCE;
+                    this.vy += Math.sin(angle) * force * MOUSE_FORCE;
+                }
+
+                const homeDx = this.baseX - this.x;
+                const homeDy = this.baseY - this.y;
+                this.vx += homeDx * 0.0003;
+                this.vy += homeDy * 0.0003;
+
+                this.vx *= FRICTION;
+                this.vy *= FRICTION;
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < -10) this.x = width + 10;
+                if (this.x > width + 10) this.x = -10;
+                if (this.y < -10) this.y = height + 10;
+                if (this.y > height + 10) this.y = -10;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.r},${this.g},${this.b},${this.alpha})`;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.lineWidth = 0.3;
+
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dx = p.x - p2.x;
+                    const dy = p.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(100,100,100,${0.08 * (1 - dist / 100)})`;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        /* ═══════════════════════════════════════
+           SMOOTH SCROLL — GO DOWN THE SPIRAL
+           ═══════════════════════════════════════ */
+        document.getElementById('scroll-btn').addEventListener('click', () => {
+            const musicSection = document.getElementById('music');
+            const navHeight = document.querySelector('nav').offsetHeight;
+            const top = musicSection.getBoundingClientRect().top + window.scrollY - navHeight - 20;
+            window.scrollTo({ top, behavior: 'smooth' });
+        });
+
+        /* ═══════════════════════════════════════
+           PLAYLIST — EDIT THESE SRC URLs
+           ═══════════════════════════════════════ */
+        const playlist = [
+            {
+                title: "STEELWORKS",
+                artist: "Rich Hard Gear",
+                src: "https://OshemProject.github.io/content/Steelworks Preview.mp3",         // ← your GitHub Pages MP3 URL here
+                soundcloud: ""   // ← your SoundCloud URL here
+            },
+            {
+                title: "GOLDMIND",
+                artist: "Le Balo'",
+                src: "https://OshemProject.github.io/content/Goldmind Preview.mp3",         // ← your GitHub Pages MP3 URL here
+                soundcloud: ""   // ← your SoundCloud URL here
+            },
+            {
+                title: "Le Baron et L'Insolent Vol.1",
+                artist: "Le Balo' VS Rich Hard Gear",
+                src: "https://OshemProject.github.io/content/Traintrack Preview.mp3",         // ← your GitHub Pages MP3 URL here
+                soundcloud: ""   // ← your SoundCloud URL here
+            }
+        ];
+
+        /* ═══════════════════════════════════════
+           AUDIO PLAYER LOGIC
+           ═══════════════════════════════════════ */
+        const audio = document.getElementById('audio');
+        const playerBar = document.getElementById('audio-player');
+        const btnPlay = document.getElementById('btn-play');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const progressTrack = document.getElementById('progress-track');
+        const progressFill = document.getElementById('progress-fill');
+        const timeCurrent = document.getElementById('time-current');
+        const timeTotal = document.getElementById('time-total');
+        const volumeSlider = document.getElementById('volume-slider');
+        const playerTitle = document.getElementById('player-title');
+        const playerArtist = document.getElementById('player-artist');
+        const trackButtons = document.querySelectorAll('.play-track');
+
+        let currentTrack = 0;
+        let isPlaying = false;
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function loadTrack(index) {
+            currentTrack = index;
+            const track = playlist[index];
+
+            if (!track.src) {
+                playerTitle.textContent = track.title;
+                playerArtist.textContent = track.artist + ' (upload MP3 to GitHub)';
+                timeTotal.textContent = '0:00';
+                return;
+            }
+
+            audio.src = track.src;
+            playerTitle.textContent = track.title;
+            playerArtist.textContent = track.artist;
+
+            trackButtons.forEach((btn, i) => {
+                if (i === index) {
+                    btn.classList.add('active');
+                    btn.textContent = isPlaying ? '⏸ Pause' : '▶ Listen';
+                } else {
+                    btn.classList.remove('active');
+                    btn.textContent = '▶ Listen';
+                }
+            });
+        }
+
+        function togglePlay() {
+            const track = playlist[currentTrack];
+            if (!track.src) {
+                alert('Add your MP3 URL to the playlist in the code to enable playback.\n\nUse GitHub Pages URLs, not raw GitHub links.');
+                return;
+            }
+
+            if (audio.paused) {
+                audio.play().then(() => {
+                    isPlaying = true;
+                    btnPlay.textContent = '⏸';
+                    playerBar.classList.add('active');
+                    trackButtons[currentTrack].textContent = '⏸ Pause';
+                }).catch(err => {
+                    console.error('Playback failed:', err);
+                    alert('Could not play audio. Check that the MP3 URL is correct and uses GitHub Pages (not raw.githubusercontent.com).');
+                });
+            } else {
+                audio.pause();
+                isPlaying = false;
+                btnPlay.textContent = '▶';
+                trackButtons[currentTrack].textContent = '▶ Listen';
+            }
+        }
+
+        function nextTrack() {
+            currentTrack = (currentTrack + 1) % playlist.length;
+            loadTrack(currentTrack);
+            if (isPlaying) audio.play();
+        }
+
+        function prevTrack() {
+            currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
+            loadTrack(currentTrack);
+            if (isPlaying) audio.play();
+        }
+
+        function updateProgress() {
+            if (audio.duration) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                progressFill.style.width = pct + '%';
+                timeCurrent.textContent = formatTime(audio.currentTime);
+                timeTotal.textContent = formatTime(audio.duration);
+            }
+        }
+
+        function seek(e) {
+            const rect = progressTrack.getBoundingClientRect();
+            const pct = (e.clientX - rect.left) / rect.width;
+            if (audio.duration) {
+                audio.currentTime = pct * audio.duration;
+            }
+        }
+
+        btnPlay.addEventListener('click', togglePlay);
+        btnNext.addEventListener('click', nextTrack);
+        btnPrev.addEventListener('click', prevTrack);
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('ended', () => {
+            isPlaying = false;
+            btnPlay.textContent = '▶';
+            trackButtons[currentTrack].textContent = '▶ Listen';
+            trackButtons[currentTrack].classList.remove('active');
+        });
+        audio.addEventListener('loadedmetadata', () => {
+            timeTotal.textContent = formatTime(audio.duration);
+        });
+        progressTrack.addEventListener('click', seek);
+
+        volumeSlider.addEventListener('input', (e) => {
+            audio.volume = e.target.value / 100;
+        });
+        audio.volume = 0.8;
+
+        trackButtons.forEach((btn) => {
+            const card = btn.closest('.music-card');
+            const index = parseInt(card.dataset.track);
+
+            btn.addEventListener('click', () => {
+                if (currentTrack === index && isPlaying) {
+                    togglePlay();
+                } else {
+                    loadTrack(index);
+                    isPlaying = false;
+                    togglePlay();
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                togglePlay();
+            }
+        });
+
+        loadTrack(0);
+
+        /* ═══════════════════════════════════════
+           CURSOR GLOW
+           ═══════════════════════════════════════ */
+        const cursorGlow = document.getElementById('cursor-glow');
+        let cx = 0, cy = 0, gx = 0, gy = 0;
+        document.addEventListener('mousemove', (e) => {
+            if (e.target.closest('#audio-player')) return;
+            cx = e.clientX; cy = e.clientY;
+        });
+        function animateCursor() {
+            gx += (cx - gx) * 0.1;
+            gy += (cy - gy) * 0.1;
+            cursorGlow.style.left = gx + 'px';
+            cursorGlow.style.top = gy + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+    </script>
+</body>
+</html>
