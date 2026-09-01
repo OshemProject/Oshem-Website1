@@ -579,6 +579,26 @@
             background: var(--accent-color);
         }
 
+        .player-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.8rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .player-close:hover {
+            color: var(--accent-color);
+            transform: scale(1.15);
+        }
+
         /* FOOTER */
         footer {
             padding: 4rem 2rem;
@@ -788,6 +808,8 @@
             <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="80">
         </div>
 
+        <button class="player-close" id="player-close" title="Close player" aria-label="Close audio player">×</button>
+
         <audio id="audio" preload="metadata"></audio>
     </div>
 
@@ -963,6 +985,7 @@
         const playerTitle = document.getElementById('player-title');
         const playerArtist = document.getElementById('player-artist');
         const trackButtons = document.querySelectorAll('.play-track');
+        const playerClose = document.getElementById('player-close');
 
         let currentTrack = 0;
         let isPlaying = false;
@@ -1057,6 +1080,23 @@
         btnPlay.addEventListener('click', togglePlay);
         btnNext.addEventListener('click', nextTrack);
         btnPrev.addEventListener('click', prevTrack);
+
+        playerClose.addEventListener('click', () => {
+            audio.pause();
+            audio.currentTime = 0;
+            isPlaying = false;
+
+            btnPlay.textContent = '▶';
+            playerBar.classList.remove('active');
+            progressFill.style.width = '0%';
+            timeCurrent.textContent = '0:00';
+
+            trackButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.textContent = '▶ Listen';
+            });
+        });
+
         audio.addEventListener('timeupdate', updateProgress);
         audio.addEventListener('ended', () => {
             isPlaying = false;
